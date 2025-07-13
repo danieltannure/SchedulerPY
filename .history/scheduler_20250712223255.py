@@ -27,7 +27,7 @@ class CronogramaWindow(QMainWindow):
         self.activities = {}  # (row, col): widget
 
         self.grid = QGridLayout()
-        self.grid.setSpacing(4)
+        self.grid.setSpacing(6)
         self.grid.setContentsMargins(20, 20, 20, 20)
 
         grid_container = QWidget()

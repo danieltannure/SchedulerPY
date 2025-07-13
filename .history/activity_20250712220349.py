@@ -61,8 +61,8 @@ class ActivityDialog(QDialog):
         if item:
             item.setSelectable(False)
             item.setEnabled(False)
-        self.day_combo.addItems(["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"])
-        self.day_combo.setCurrentIndex(1)
+        self.day_combo.addItems(["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"])
+        self.day_combo.setCurrentIndex(0)
         self.code.setPlaceholderText("(Código)")
         self.title.setPlaceholderText("(Título)")
 
@@ -120,13 +120,11 @@ class ActivityDialog(QDialog):
         )
         base_font = QFont(fonts["Poppins-Medium.ttf"], 10)
         line_h = QFontMetrics(base_font).lineSpacing()
-        rows = height_px // line_h  # usado só para cálculo de linhas de texto
+        rows = height_px // line_h
 
         widget = AdaptiveLabel(fonts, parent=parent)
         widget.set_parts(data["code"], data["title"], time_str)
-
-        # NÃO usa setFixedHeight — o layout controla o tamanho do widget
-        # widget.setFixedHeight(height_px)  <-- REMOVIDO
+        widget.setFixedHeight(height_px)
 
         # Aplica degradê com base no nome da cor
         grad_dict = dict(self.GRADIENT_COLORS)
@@ -185,16 +183,9 @@ class AdaptiveLabel(QLabel):
         base = self.base_color or self.palette().window().color()
         grad = self.gradient_color or base.darker(130)
 
-        # Aplica opacidade ao gradiente
-        grad_opaco = QColor(grad)
-        grad_opaco.setAlpha(180)  # valor de 0 (transparente) a 255 (opaco)
-
         gradient = QLinearGradient(rect.topLeft(), rect.bottomLeft())  # vertical
-
-        # Degradê começa só perto do fim
         gradient.setColorAt(0.0, base)
-        gradient.setColorAt(0.6, base)
-        gradient.setColorAt(1.0, grad_opaco)
+        gradient.setColorAt(1.0, grad)
 
         painter.setPen(Qt.NoPen)
         painter.setBrush(gradient)

@@ -61,8 +61,8 @@ class ActivityDialog(QDialog):
         if item:
             item.setSelectable(False)
             item.setEnabled(False)
-        self.day_combo.addItems(["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"])
-        self.day_combo.setCurrentIndex(1)
+        self.day_combo.addItems(["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"])
+        self.day_combo.setCurrentIndex(0)
         self.code.setPlaceholderText("(Código)")
         self.title.setPlaceholderText("(Título)")
 

@@ -22,12 +22,12 @@ class CronogramaWindow(QMainWindow):
         self.resize(1000, 950)
 
         self.rows = 14  # 7h às 21h
-        self.cols = 7  # dias da semana: seg a sáb
+        self.cols = 6  # dias da semana: seg a sáb
         self.cell_height = 60
         self.activities = {}  # (row, col): widget
 
         self.grid = QGridLayout()
-        self.grid.setSpacing(4)
+        self.grid.setSpacing(6)
         self.grid.setContentsMargins(20, 20, 20, 20)
 
         grid_container = QWidget()
@@ -44,7 +44,7 @@ class CronogramaWindow(QMainWindow):
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.grid.addWidget(label, row + 1, 0)  # coluna 0: horários
 
-        days = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
+        days = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
         for col, day in enumerate(days):
             label = QLabel(day)
             label.setAlignment(Qt.AlignCenter)

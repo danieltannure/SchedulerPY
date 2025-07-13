@@ -1,3 +1,5 @@
+# scheduler_grid.py
+
 from PyQt5.QtWidgets import (
     QMainWindow,
     QPushButton,
@@ -10,7 +12,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QScrollArea,
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QTimer, Qt
 from activity import ActivityDialog
 
 
@@ -22,12 +24,12 @@ class CronogramaWindow(QMainWindow):
         self.resize(1000, 950)
 
         self.rows = 14  # 7h às 21h
-        self.cols = 7  # dias da semana: seg a sáb
+        self.cols = 6  # dias da semana: seg a sáb
         self.cell_height = 60
         self.activities = {}  # (row, col): widget
 
         self.grid = QGridLayout()
-        self.grid.setSpacing(4)
+        self.grid.setSpacing(6)
         self.grid.setContentsMargins(20, 20, 20, 20)
 
         grid_container = QWidget()
@@ -44,11 +46,12 @@ class CronogramaWindow(QMainWindow):
             label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
             self.grid.addWidget(label, row + 1, 0)  # coluna 0: horários
 
-        days = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]
+        days = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]
         for col, day in enumerate(days):
             label = QLabel(day)
             label.setAlignment(Qt.AlignCenter)
             self.grid.addWidget(label, 0, col + 1)  # linha 0: cabeçalho
+        # [linha, coluna] começa em (1,1)
 
         # Botões
         self.add_button = QPushButton("Adicionar")
@@ -103,12 +106,9 @@ class CronogramaWindow(QMainWindow):
                 )
                 return
 
-        # Passa height_px apenas para cálculos internos de texto, mas NÃO fixa altura
         height_px = self.cell_height * span
         widget = dlg.create_widget(self.fonts, parent=self, height_px=height_px)
-
-        # REMOVIDO: widget.setFixedHeight(height_px)
-
+        widget.setFixedHeight(height_px)
         widget.mousePressEvent = lambda e, r=row, c=col: (
             self.delete_activity(r, c) if self.delete_mode else None
         )

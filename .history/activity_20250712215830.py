@@ -19,7 +19,6 @@ from PyQt5.QtGui import (
     QColor,
     QStandardItemModel,
     QStandardItem,
-    QLinearGradient,
 )
 
 
@@ -61,8 +60,8 @@ class ActivityDialog(QDialog):
         if item:
             item.setSelectable(False)
             item.setEnabled(False)
-        self.day_combo.addItems(["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"])
-        self.day_combo.setCurrentIndex(1)
+        self.day_combo.addItems(["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"])
+        self.day_combo.setCurrentIndex(0)
         self.code.setPlaceholderText("(Código)")
         self.title.setPlaceholderText("(Título)")
 
@@ -83,7 +82,6 @@ class ActivityDialog(QDialog):
             icon = QIcon(pix)
             item = QStandardItem(icon, name)
             item.setData(QColor(hexc), Qt.UserRole)
-            item.setData(name, Qt.UserRole + 1)  # guarda o nome da cor
             self.color_combo.model().appendRow(item)
 
         layout = QFormLayout(self)
@@ -102,7 +100,6 @@ class ActivityDialog(QDialog):
 
     def get_data(self):
         color = self.color_combo.currentData(Qt.UserRole)
-        name = self.color_combo.currentData(Qt.UserRole + 1)
         return {
             "day": self.day_combo.currentIndex(),
             "code": self.code.text(),
@@ -110,7 +107,6 @@ class ActivityDialog(QDialog):
             "start": self.start_time.time(),
             "end": self.end_time.time(),
             "color": color,
-            "color_name": name,
         }
 
     def create_widget(self, fonts, parent, height_px):
@@ -120,19 +116,13 @@ class ActivityDialog(QDialog):
         )
         base_font = QFont(fonts["Poppins-Medium.ttf"], 10)
         line_h = QFontMetrics(base_font).lineSpacing()
-        rows = height_px // line_h  # usado só para cálculo de linhas de texto
+        rows = height_px // line_h
 
         widget = AdaptiveLabel(fonts, parent=parent)
         widget.set_parts(data["code"], data["title"], time_str)
-
-        # NÃO usa setFixedHeight — o layout controla o tamanho do widget
-        # widget.setFixedHeight(height_px)  <-- REMOVIDO
-
-        # Aplica degradê com base no nome da cor
-        grad_dict = dict(self.GRADIENT_COLORS)
-        grad_hex = grad_dict.get(data["color_name"], "#000000")
-        widget.set_gradient_colors(data["color"].name(), grad_hex)
-
+        widget.setFixedHeight(height_px)
+        if data["color"]:
+            widget.setStyleSheet(f"background-color:{data['color'].name()};")
         return widget
 
     def adjust_label_font(self, label):
@@ -165,11 +155,9 @@ class AdaptiveLabel(QLabel):
         self.base_color = None
         self.gradient_color = None
 
-    def set_gradient_colors(self, base_hex, grad_hex=None):
+    def set_gradient_colors(self, base_hex, grad_hex):
         self.base_color = QColor(base_hex)
-        self.gradient_color = (
-            QColor(grad_hex) if grad_hex else QColor(base_hex).darker(130)
-        )
+        self.gradient_color = QColor(grad_hex)
 
     def set_parts(self, code, title, time):
         self.code, self.title, self.time = code, title, time
@@ -181,26 +169,19 @@ class AdaptiveLabel(QLabel):
         painter.setRenderHint(QPainter.TextAntialiasing)
         rect = self.contentsRect().adjusted(4, 4, -4, -4)
 
-        radius = 10
-        base = self.base_color or self.palette().window().color()
-        grad = self.gradient_color or base.darker(130)
+        radius = 7
+        color = self.palette().window().color()
 
-        # Aplica opacidade ao gradiente
-        grad_opaco = QColor(grad)
-        grad_opaco.setAlpha(180)  # valor de 0 (transparente) a 255 (opaco)
-
-        gradient = QLinearGradient(rect.topLeft(), rect.bottomLeft())  # vertical
-
-        # Degradê começa só perto do fim
-        gradient.setColorAt(0.0, base)
-        gradient.setColorAt(0.6, base)
-        gradient.setColorAt(1.0, grad_opaco)
+        # Gradiente
+        gradient = QLinearGradient(rect.topLeft(), rect.bottomRight())
+        gradient.setColorAt(0.0, self.base_color if self.base_color else color)
+        gradient.setColorAt(1.0, self.gradient_color if self.gradient_color else color)
 
         painter.setPen(Qt.NoPen)
         painter.setBrush(gradient)
         painter.drawRoundedRect(rect, radius, radius)
 
-        # Fonte e textos
+        # Fonte e textos (mantém o que você já tinha)
         base_font = self.font()
         line_h = QFontMetrics(base_font).lineSpacing()
         rows = rect.height() // line_h
